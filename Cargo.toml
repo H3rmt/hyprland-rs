@@ -1,15 +1,15 @@
 [package]
-name = "hyprland"
+name = "hyprshell-hyprland"
 edition = "2021"
 readme = "README.md"
 description = "A unoffical rust wrapper for hyprland's IPC"
 homepage = "https://github.com/hyprland-community/hyprland-rs"
-version.workspace = true
-license.workspace = true
-authors.workspace = true
-repository.workspace = true
-keywords.workspace = true
-categories.workspace = true
+version = "0.4.0-beta.2"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/hyprland-community/hyprland-rs"
+keywords = ["hyprland", "ipc", "hypr", "wayland", "hyprpaper"]
+categories = ["api-bindings"]
+authors = ["yavko <yavornkolev@gmail.com>"]
 rust-version = "1.75.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -21,21 +21,8 @@ opt-level = 3
 strip = true
 lto = true
 
-[workspace]
-members = [
-    "hyprland-macros",
-]
-
-[workspace.package]
-version = "0.4.0-beta.2"
-license = "GPL-3.0-or-later"
-repository = "https://github.com/hyprland-community/hyprland-rs"
-keywords = ["hyprland", "ipc", "hypr", "wayland", "hyprpaper"]
-categories = ["api-bindings"]
-authors = ["yavko <yavornkolev@gmail.com>"]
-
 [dependencies]
-hyprland-macros = { path = "hyprland-macros", version = "0.4.0-beta.2" }
+hyprland-macros = { package = "hyprshell-hyprland-macros", path = "./hyprland-macros", version = "0.4.0-beta.2" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde_repr = "0.1"

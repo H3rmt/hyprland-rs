@@ -1,8 +1,8 @@
 [package]
-name = "hyprland-macros"
+name = "hyprshell-hyprland-macros"
 description = "Macros used in hyprland-rs"
-version.workspace = true
-license.workspace = true
+version = "0.4.0-beta.2"
+license = "GPL-3.0-or-later"
 readme = "README.md"
 edition = "2021"
 homepage = "https://github.com/hyprland-community/hyprland-rs/tree/master/hyprland-macros"
