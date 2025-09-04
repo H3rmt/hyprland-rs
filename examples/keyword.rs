@@ -1,3 +1,5 @@
+use hyprshell_hyprland as hyprland;
+
 /// Demostrates how to fetch and set keywords
 ///
 /// Usage: cargo run --example keyword <keyword> <value>?

@@ -1,3 +1,5 @@
+use hyprshell_hyprland as hyprland;
+
 /// Demostrates how to fetch and set keywords asyncronously
 ///
 /// Usage: cargo run --example keyword_async <keyword> <value>

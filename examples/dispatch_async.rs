@@ -1,3 +1,5 @@
+use hyprshell_hyprland as hyprland;
+
 use hyprland::dispatch::DispatchType::*;
 use hyprland::dispatch::{Corner, Dispatch, FullscreenType, WorkspaceIdentifierWithSpecial};
 /// Demonstrates usage of various asyncronous dispatch calls

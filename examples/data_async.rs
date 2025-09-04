@@ -1,3 +1,5 @@
+use hyprshell_hyprland as hyprland;
+
 /// Demostrates asynchronously using Hyprland-rs to fetch information about your Hyprland environment
 ///
 /// Usage: cargo run --example data_async <animations|binds|client(s)|workspace(s)|monitor(s)>

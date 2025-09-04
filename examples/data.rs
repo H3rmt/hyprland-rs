@@ -1,3 +1,5 @@
+use hyprshell_hyprland as hyprland;
+
 /// Demostrates using hyprland-rs to fetch information about clients, workspaces and monitors
 ///
 /// Usage: cargo run --example data <animations|binds|client(s)|workspace(s)|monitor(s)>
