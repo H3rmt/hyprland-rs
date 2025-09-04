@@ -4,7 +4,6 @@ use hyprshell_hyprland as hyprland;
 /// Usage: cargo run --example events
 use hyprland::event_listener::EventListener;
 
-
 fn main() -> hyprland::Result<()> {
     // Create a event listener
     let mut event_listener = EventListener::new();
