@@ -1,6 +1,9 @@
 use crate::default_instance;
 use crate::instance::Instance;
-use crate::lua::{format_bool_field, format_string, format_string_field, format_string_field_opt};
+use crate::lua::{
+    format_bool_field, format_bool_field_opt, format_string, format_string_field,
+    format_string_field_opt,
+};
 use crate::shared::*;
 use derive_more::Display;
 use std::string::ToString;
@@ -109,6 +112,97 @@ pub enum WorkspaceIdentifier {
     Special(Option<String>),
 }
 
+/// This enum is the param to [DispatchType::MoveWindow::OutOfGroup] dispatcher
+#[derive(Debug, Clone, PartialEq, Eq, Display)]
+pub enum OutOfGroupParam {
+    /// true for directionless
+    #[display("true")]
+    Directionless,
+    /// Direction to move the window to
+    #[display("\"{}\"", _0)]
+    Direction(Direction),
+}
+
+/// This enum is the params to [DispatchType::MoveWindow] dispatcher
+#[derive(Debug, Clone, PartialEq, Eq, Display)]
+pub enum WindowMove {
+    /// Moves a window in a specified direction
+    #[display(
+        "direction = \"{}\", {}",
+        direction,
+        format_bool_field_opt("group_aware", group_aware)
+    )]
+    Direction {
+        /// The direction the window should get moved to
+        direction: Direction,
+        /// group_aware = true will put windows in/out of groups alongside the given direction
+        group_aware: Option<bool>,
+    },
+
+    /// Moves a window to a workspace
+    #[display(
+        "workspace = \"{}\", {}",
+        workspace,
+        format_bool_field_opt("follow", follow)
+    )]
+    Workspace {
+        /// The workspace to move
+        workspace: WorkspaceIdentifier,
+        /// Follow the focus to the moved window
+        follow: Option<bool>,
+    },
+
+    /// Moves a window to a specified monitor
+    #[display(
+        "monitor = \"{}\", {}",
+        monitor,
+        format_bool_field_opt("follow", follow)
+    )]
+    Monitor {
+        /// The monitor to move to
+        monitor: MonitorIdentifier,
+        /// Follow the focus to the moved window
+        follow: Option<bool>,
+    },
+
+    /// Move a window by / to a coordinate
+    #[display(
+        "x = {}, y = {}, {}",
+        x,
+        y,
+        format_bool_field_opt("relative", relative)
+    )]
+    Coord {
+        /// X coordinate
+        x: i32,
+        /// Y coordinate
+        y: i32,
+        /// If true, treat x/y as relative offset
+        relative: Option<bool>,
+    },
+
+    /// Move a window into a group in a direction
+    #[display("into_group = \"{}\"", into_group)]
+    IntoGroup {
+        /// Move direction
+        into_group: Direction,
+    },
+
+    /// Move a window into a group in a direction, or create a group if no group exists in that direction
+    #[display("into_or_create_group = \"{}\"", into_or_create_group)]
+    IntoOrCreateGroup {
+        /// Move direction
+        into_or_create_group: Direction,
+    },
+
+    /// Move a window out of a group
+    #[display("out_of_group = {}", out_of_group)]
+    OutOfGroup {
+        /// true for directionless, direction for a direction
+        out_of_group: OutOfGroupParam,
+    },
+}
+
 /// This struct holds options for the first empty workspace
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Display)]
 #[display("{{ on_monitor = {on_monitor}, next = {next} }}")]
@@ -206,6 +300,10 @@ pub enum Dispatch {
     #[display("hl.dsp.pass({{ {}}})", format_string_field_opt("window", &_0))]
     Pass(Option<WindowIdentifier>),
 
+    /// window-related dispatchers
+    #[display("{}", _0)]
+    Window(windows::Dispatch),
+
     // send a specific shortcut to a window
     // send_shortcut({ mods, key, window? })
     // same as above, but you control down / up
@@ -272,19 +370,100 @@ impl Dispatch {
 }
 impl ToDispatch for Dispatch {}
 
-mod windows {
-    use crate::dispatch_new::{ToDispatch, WindowIdentifier};
+pub mod windows {
+    use crate::dispatch_new::{ToDispatch, WindowIdentifier, WindowMove};
+    use crate::lua::format_string_field_opt;
     use derive_more::Display;
 
     #[derive(Debug, Clone, PartialEq, Eq, Display)]
     pub enum Dispatch {
         /// Close a window.
-        #[display("todo")]
+        #[display("hl.dsp.window.close({{ {} }})", format_string_field_opt("window", &_0))]
         Close(Option<WindowIdentifier>),
         /// Kill a window
-        #[display("todo")]
+        #[display("hl.dsp.window.kill({{ {} }})", format_string_field_opt("window", &_0))]
         Kill(Option<WindowIdentifier>),
+        /// Move a window.
+        #[display("hl.dsp.window.move({{ {} }})", _0)]
+        Move(WindowMove),
         // ...
     }
     impl ToDispatch for Dispatch {}
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_window_move_to_string() {
+        let cases = vec![
+            (
+                WindowMove::Direction {
+                    direction: Direction::Right,
+                    group_aware: Some(true),
+                },
+                r#"direction = "r", group_aware = true, "#,
+            ),
+            (
+                WindowMove::Direction {
+                    direction: Direction::Left,
+                    group_aware: None,
+                },
+                r#"direction = "l", "#,
+            ),
+            (
+                WindowMove::Workspace {
+                    workspace: WorkspaceIdentifier::Id(3),
+                    follow: Some(true),
+                },
+                r#"workspace = "3", follow = true, "#,
+            ),
+            (
+                WindowMove::Workspace {
+                    workspace: WorkspaceIdentifier::Name("dev".into()),
+                    follow: None,
+                },
+                r#"workspace = "name:dev", "#,
+            ),
+            (
+                WindowMove::Monitor {
+                    monitor: MonitorIdentifier::Current,
+                    follow: Some(false),
+                },
+                r#"monitor = "current", follow = false, "#,
+            ),
+            (
+                WindowMove::Coord {
+                    x: 10,
+                    y: -20,
+                    relative: Some(true),
+                },
+                r#"x = 10, y = -20, relative = true, "#,
+            ),
+            (
+                WindowMove::IntoOrCreateGroup {
+                    into_or_create_group: Direction::Down,
+                },
+                r#"into_or_create_group = "d""#,
+            ),
+        ];
+
+        for (input, expected) in cases {
+            assert_eq!(input.to_string(), expected);
+        }
+    }
+
+    #[test]
+    fn test_window_move_out_of_group_to_string() {
+        let directionless = WindowMove::OutOfGroup {
+            out_of_group: OutOfGroupParam::Directionless,
+        };
+        assert_eq!(directionless.to_string(), "out_of_group = true");
+
+        let directional = WindowMove::OutOfGroup {
+            out_of_group: OutOfGroupParam::Direction(Direction::Up),
+        };
+        assert_eq!(directional.to_string(), r#"out_of_group = "u""#);
+    }
 }
