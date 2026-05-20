@@ -119,7 +119,7 @@ pub enum OutOfGroupParam {
     #[display("true")]
     Directionless,
     /// Direction to move the window to
-    #[display("{_0}")]
+    #[display("\"{}\"", _0)]
     Direction(Direction),
 }
 
@@ -464,6 +464,6 @@ mod tests {
         let directional = WindowMove::OutOfGroup {
             out_of_group: OutOfGroupParam::Direction(Direction::Up),
         };
-        assert_eq!(directional.to_string(), "out_of_group = u");
+        assert_eq!(directional.to_string(), r#"out_of_group = "u""#);
     }
 }
