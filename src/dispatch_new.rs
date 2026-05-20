@@ -378,10 +378,10 @@ pub mod windows {
     #[derive(Debug, Clone, PartialEq, Eq, Display)]
     pub enum Dispatch {
         /// Close a window.
-        #[display("hl.dsp.window.close({{ {}}})", format_string_field_opt("window", &_0))]
+        #[display("hl.dsp.window.close({{ {} }})", format_string_field_opt("window", &_0))]
         Close(Option<WindowIdentifier>),
         /// Kill a window
-        #[display("hl.dsp.window.kill({{ {}}})", format_string_field_opt("window", &_0))]
+        #[display("hl.dsp.window.kill({{ {} }})", format_string_field_opt("window", &_0))]
         Kill(Option<WindowIdentifier>),
         /// Move a window.
         #[display("hl.dsp.window.move({{ {} }})", _0)]
